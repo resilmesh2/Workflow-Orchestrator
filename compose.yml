@@ -15,7 +15,7 @@ services:
     volumes:
       - /var/lib/elasticsearch/data
     networks:
-      - casm_isim_test_network
+      - resilmesh_network
 
   postgresql:
     container_name: temporal-postgresql
@@ -28,7 +28,7 @@ services:
     volumes:
       - /var/lib/postgresql/data
     networks:
-      - casm_isim_test_network
+      - resilmesh_network
 
   temporal:
     container_name: temporal
@@ -53,7 +53,7 @@ services:
     volumes:
       - ./temporalio/dynamicconfig:/etc/temporal/config/dynamicconfig
     networks:
-      - casm_isim_test_network
+      - resilmesh_network
     healthcheck:
       test: ["CMD","tctl", "--address", "temporal:7233", "workflow", "list", "||", "exit 1"]
       interval: 10s
@@ -72,7 +72,7 @@ services:
     stdin_open: true
     tty: true
     networks:
-      - casm_isim_test_network
+      - resilmesh_network
 
   temporal-ui:
     container_name: temporal-ui
@@ -85,8 +85,4 @@ services:
     ports:
       - 8080:8080
     networks:
-      - casm_isim_test_network
-
-networks:
-  casm_isim_test_network:
-    name: casm_isim_test_network
+      - resilmesh_network
