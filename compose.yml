@@ -1,6 +1,6 @@
 services:
-  elasticsearch:
-    container_name: temporal-elasticsearch
+  resilmesh_sap_wo_elasticsearch:
+    container_name: resilmesh_sap_wo_temporal-elasticsearch
     environment:
       - cluster.routing.allocation.disk.threshold_enabled=true
       - cluster.routing.allocation.disk.watermark.low=512mb
@@ -17,8 +17,8 @@ services:
     networks:
       - resilmesh_network
 
-  postgresql:
-    container_name: temporal-postgresql
+  resilmesh_sap_wo_postgresql:
+    container_name: resilmesh_sap_wo_temporal-postgresql
     environment:
       POSTGRES_PASSWORD: temporal
       POSTGRES_USER: temporal
@@ -30,11 +30,11 @@ services:
     networks:
       - resilmesh_network
 
-  temporal:
-    container_name: temporal
+  resilmesh_sap_wo_temporal:
+    container_name: resilmesh_sap_wo_temporal
     depends_on:
-      - postgresql
-      - elasticsearch
+      - resilmesh_sap_wo_postgresql
+      - resilmesh_sap_wo_elasticsearch
     environment:
       - DB=postgres12
       - DB_PORT=5432
@@ -55,34 +55,40 @@ services:
     networks:
       - resilmesh_network
     healthcheck:
-      test: ["CMD","tctl", "--address", "temporal:7233", "workflow", "list", "||", "exit 1"]
+      test: ["CMD","tctl", "--address", "resilmesh_sap_wo_temporal:7233", "workflow", "list", "||", "exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
-  temporal-admin-tools:
-    container_name: temporal-admin-tools
+  resilmesh_sap_wo_temporal-admin-tools:
+    container_name: resilmesh_sap_wo_temporal-admin-tools
     depends_on:
-      - temporal
+      - resilmesh_sap_wo_temporal
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CLI_ADDRESS=temporal:7233
+      - TEMPORAL_ADDRESS=resilmesh_sap_wo_temporal:7233
+      - TEMPORAL_CLI_ADDRESS=resilmesh_sap_wo_temporal:7233
     image: temporalio/admin-tools:${TEMPORAL_VERSION:-1.22.7}
     stdin_open: true
     tty: true
     networks:
       - resilmesh_network
 
-  temporal-ui:
-    container_name: temporal-ui
+  resilmesh_sap_wo_temporal-ui:
+    container_name: resilmesh_sap_wo_temporal-ui
     depends_on:
-      - temporal
+      - resilmesh_sap_wo_temporal
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_ADDRESS=resilmesh_sap_wo_temporal:7233
       - TEMPORAL_CORS_ORIGINS=http://localhost:3000
     image: temporalio/ui:${TEMPORAL_UI_VERSION:-2.31.2}
     ports:
       - 8080:8080
     networks:
       - resilmesh_network
+
+
+networks:
+  resilmesh_network:
+    external: true
+
